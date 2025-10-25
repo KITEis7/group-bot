@@ -19,3 +19,9 @@ def parse_members(text):
 def to_zenkaku(num):
     table = str.maketrans({
         "0": "０", "1": "１", "2": "２", "3": "３", "4": "４",
+        "5": "５", "6": "６", "7": "７", "8": "８", "9": "９"
+    })
+    return str(num).translate(table)
+
+# 2〜4人でなるべく均等に分ける関数
+def make_groups(members):_
