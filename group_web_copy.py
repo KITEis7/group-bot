@@ -1,7 +1,7 @@
 import streamlit as st
 import random
 
-st.title("🎲 グループ分けBOT")
+st.title("わけわけBOT")
 
 # メンバー入力欄
 members_input = st.text_area(
@@ -56,7 +56,7 @@ function copyToClipboard(text) {
 </script>
 """, unsafe_allow_html=True)
 
-# ボタン押下時
+# グループ分けボタン
 if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直す"):
     members = parse_members(members_input)
     if not members:
@@ -74,9 +74,9 @@ if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直
         all_text = "\n".join(all_text_lines)
         st.text_area("結果", value=all_text, height=200)
 
-        # ボタン用は改行を \n に置換しない → 一行にまとめて渡す
-        js_text = "\\n".join(all_text_lines)
+        # まとめコピー
+        js_text_all = all_text.replace("`", "'").replace("\n", "\\n")
         st.markdown(
-            f'<button onclick="copyToClipboard(`{js_text}`)" style="margin-top:5px;">📋 すべてコピー</button>',
+            f'<button onclick="copyToClipboard(`{js_text_all}`)" style="margin-top:10px;">📋 まとめてコピー</button>',
             unsafe_allow_html=True
         )
