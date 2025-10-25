@@ -1,16 +1,19 @@
 import streamlit as st
 import random
 
-st.title("🎲 グループ分けBOT")
+st.title("🎲 グループ分けBOT（まとめコピー専用）")
 
+# メンバー入力
 members_input = st.text_area(
-    "メンバーを入力してください（カンマ、全角スペース、半角スペース区切りOK）", ""
+    "メンバーを入力してください（カンマ、半角スペース、全角スペース区切りOK）", ""
 )
 
+# メンバーを分割
 def parse_members(text):
     text = text.replace("　", " ").replace(",", " ")
     return [m.strip() for m in text.split() if m.strip()]
 
+# 半角数字→全角
 def to_zenkaku(num):
     table = str.maketrans({
         "0":"０","1":"１","2":"２","3":"３","4":"４",
@@ -18,11 +21,13 @@ def to_zenkaku(num):
     })
     return str(num).translate(table)
 
+# 2～4人で均等に分ける
 def make_groups(members):
     total = len(members)
     random.shuffle(members)
     best_groups = None
     min_diff = float("inf")
+
     for n_groups in range(1, total+1):
         size = total // n_groups
         if size < 2 or size > 4:
@@ -40,9 +45,10 @@ def make_groups(members):
             best_groups = groups
     return best_groups
 
-# ボタン押下時
+# グループ分けボタン
 if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直す"):
     members = parse_members(members_input)
+    
     if not members:
         st.warning("⚠ メンバーを入力してください。")
     elif len(members) < 2:
@@ -54,12 +60,13 @@ if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直
             zenkaku_num = to_zenkaku(i)
             line = f"#パーティー{zenkaku_num}テキスト " + ", ".join(group)
             all_text_lines.append(line)
+        
         all_text = "\n".join(all_text_lines)
-
-        # 表示
-        st.text_area("結果", value=all_text, height=200, key="result_area")
+        
+        # 結果表示
+        st.text_area("結果", value=all_text, height=250)
 
         # まとめコピー（Streamlit 標準）
         if st.button("📋 まとめてコピー"):
             st.experimental_set_clipboard(all_text)
-            st.success("✅ コピーしました！")
+            st.success("✅ 結果をコピーしました！")
