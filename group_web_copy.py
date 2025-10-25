@@ -1,57 +1,29 @@
-import streamlit as st
-import random
+import os
 
-st.title("わけわけボット")
+# 入力フォルダと出力フォルダを指定
+input_folder = "input_txt"
+output_folder = "output_txt"
 
-# セッションステートでメンバーと結果を保持
-if 'members' not in st.session_state:
-    st.session_state.members = []
-if 'result_text' not in st.session_state:
-    st.session_state.result_text = ""
+# 出力フォルダが存在しない場合は作成
+os.makedirs(output_folder, exist_ok=True)
 
-# メンバー入力
-members_input = st.text_area("メンバーをカンマ区切りで入力してください", ",".join(st.session_state.members))
+# ファイルを処理
+for i, filename in enumerate(sorted(os.listdir(input_folder)), start=1):
+    if filename.endswith(".txt"):
+        # 入力ファイルを読み込み
+        input_path = os.path.join(input_folder, filename)
+        with open(input_path, "r", encoding="utf-8") as f:
+            content = f.read().strip()
 
-# メンバーリスト更新
-if members_input.strip() != "":
-    st.session_state.members = [m.strip() for m in members_input.split(",") if m.strip()]
+        # 区切り文字を統一して分割（カンマ、全角スペース、半角スペース対応）
+        members = [m.strip() for m in content.replace("　", " ").replace(",", " ").split() if m.strip()]
 
-def make_groups(members):
-    members = members[:]
-    random.shuffle(members)
-    groups = []
-    while len(members) > 0:
-        if len(members) >= 4:
-            group_size = 4
-        elif len(members) == 3:
-            group_size = 3
-        elif len(members) == 2:
-            group_size = 2
-        else:  # 残り1人
-            groups[-1].append(members.pop(0))
-            break
-        group = [members.pop(0) for _ in range(group_size)]
-        groups.append(group)
-    return groups
+        # 出力内容を作成（全角数字ではなく半角数字を使用）
+        output_text = f"#パーティー{i}テキスト\n" + ", ".join(members) + "\n"
 
-def generate_result():
-    groups = make_groups(st.session_state.members)
-    result_text = ""
-    for i, g in enumerate(groups, 1):
-        result_text += f"#パーティー{i} " + ", ".join(g) + " テキスト\n"  # ← 「テキスト」追加
-    st.session_state.result_text = result_text
+        # 出力ファイルに書き込み
+        output_path = os.path.join(output_folder, filename)
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(output_text)
 
-# ボタン
-col1, col2 = st.columns(2)
-if col1.button("グループ分け"):
-    generate_result()
-if col2.button("振り分け直し"):
-    generate_result()
-
-# 結果表示
-st.text_area("結果", st.session_state.result_text, height=200)
-
-# クリップボードコピー（ブラウザ依存）
-if st.button("コピー"):
-    st.experimental_set_query_params(copy=st.session_state.result_text)
-    st.success("クリップボードにコピーされました（ブラウザ依存）")
+print("✅ 変換完了しました！")
