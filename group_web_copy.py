@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import html
 
 st.title("わけわけBOT")
 
@@ -40,17 +41,6 @@ def make_groups(members):
             best_groups = groups
     return best_groups
 
-# JS コピー関数
-st.markdown("""
-<script>
-function copyToClipboard() {
-  const text = document.getElementById("result_textarea").value;
-  navigator.clipboard.writeText(text);
-  alert("✅ コピーしました！");
-}
-</script>
-""", unsafe_allow_html=True)
-
 if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直す"):
     members = parse_members(members_input)
     if not members:
@@ -66,11 +56,19 @@ if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直
             all_text_lines.append(line)
         all_text = "\n".join(all_text_lines)
 
-        # TextArea に表示して ID を付与
-        st.text_area("結果", value=all_text, height=200, key="result_textarea", label_visibility="collapsed")
+        # 表示用
+        st.text_area("結果", value=all_text, height=200)
 
-        # まとめコピー用ボタン
-        st.markdown(
-            '<button onclick="copyToClipboard()" style="margin-top:10px;">📋 まとめてコピー</button>',
-            unsafe_allow_html=True
-        )
+        # コピー用 HTML + JS
+        escaped_text = html.escape(all_text)
+        st.markdown(f"""
+        <textarea id="copy_area" style="display:none;">{escaped_text}</textarea>
+        <button onclick="
+        const ta = document.getElementById('copy_area');
+        ta.style.display='block';
+        ta.select();
+        document.execCommand('copy');
+        ta.style.display='none';
+        alert('✅ コピーしました！');
+        ">📋 まとめてコピー</button>
+        """, unsafe_allow_html=True)
