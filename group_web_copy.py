@@ -1,29 +1,41 @@
-import os
+import streamlit as st
+import random
 
-# 入力フォルダと出力フォルダを指定
-input_folder = "input_txt"
-output_folder = "output_txt"
+st.title("🎲 グループ分けBOT")
 
-# 出力フォルダが存在しない場合は作成
-os.makedirs(output_folder, exist_ok=True)
+# メンバー入力欄
+members_input = st.text_area("メンバーを入力してください（カンマ、全角スペース、半角スペース区切りOK）", "")
 
-# ファイルを処理
-for i, filename in enumerate(sorted(os.listdir(input_folder)), start=1):
-    if filename.endswith(".txt"):
-        # 入力ファイルを読み込み
-        input_path = os.path.join(input_folder, filename)
-        with open(input_path, "r", encoding="utf-8") as f:
-            content = f.read().strip()
+# 区切りを統一して分割
+def parse_members(text):
+    # 全角スペース → 半角スペース、カンマ → スペースに統一
+    text = text.replace("　", " ").replace(",", " ")
+    # スペースで分割して空白除去
+    members = [m.strip() for m in text.split() if m.strip()]
+    return members
 
-        # 区切り文字を統一して分割（カンマ、全角スペース、半角スペース対応）
-        members = [m.strip() for m in content.replace("　", " ").replace(",", " ").split() if m.strip()]
+# 半角数字を全角に変換
+def to_zenkaku(num):
+    table = str.maketrans({
+        "0": "０", "1": "１", "2": "２", "3": "３", "4": "４",
+        "5": "５", "6": "６", "7": "７", "8": "８", "9": "９"
+    })
+    return str(num).translate(table)
 
-        # 出力内容を作成（全角数字ではなく半角数字を使用）
-        output_text = f"#パーティー{i}テキスト\n" + ", ".join(members) + "\n"
+# グループサイズを指定
+group_size = st.number_input("1グループの人数", min_value=2, max_value=4, value=4, step=1)
 
-        # 出力ファイルに書き込み
-        output_path = os.path.join(output_folder, filename)
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(output_text)
+# グループ分け処理
+if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直す"):
+    members = parse_members(members_input)
 
-print("✅ 変換完了しました！")
+    if not members:
+        st.warning("⚠ メンバーを入力してください。")
+    else:
+        random.shuffle(members)
+        groups = [members[i:i + group_size] for i in range(0, len(members), group_size)]
+
+        for i, group in enumerate(groups, start=1):
+            group_text = ", ".join(group)
+            zenkaku_num = to_zenkaku(i)
+            st.markdown(f"### #パーティー{zenkaku_num}テキスト\n{group_text}")
