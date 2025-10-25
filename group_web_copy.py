@@ -36,10 +36,8 @@ def make_groups(members):
         break
     return best_groups
 
-result_text = ""  # 結果文字列を保持する変数
-
 # グループ分けボタン
-if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直す"):
+if st.button("🎯 グループ分けする"):
     members = parse_members(members_input)
     if not members:
         st.warning("⚠ メンバーを入力してください。")
@@ -52,10 +50,6 @@ if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直
             znum = to_zenkaku(i)
             lines.append(f"#パーティー{znum}テキスト " + ", ".join(group))
         result_text = "\n".join(lines)
-        st.text_area("結果", value=result_text, height=250)
 
-# まとめコピー専用ボタン
-if result_text:
-    if st.button("📋 まとめてコピー"):
-        st.experimental_set_clipboard(result_text)
-        st.success("✅ 結果をコピーしました！")
+        # 結果表示（Ctrl+Cで確実にコピー）
+        st.text_area("結果（Ctrl+Cでコピーしてください）", value=result_text, height=250)
