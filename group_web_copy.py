@@ -1,8 +1,7 @@
 import streamlit as st
 import random
-import html
 
-st.title("わけわけBOT")
+st.title("🎲 グループ分けBOT")
 
 members_input = st.text_area(
     "メンバーを入力してください（カンマ、全角スペース、半角スペース区切りOK）", ""
@@ -41,6 +40,7 @@ def make_groups(members):
             best_groups = groups
     return best_groups
 
+# ボタン押下時
 if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直す"):
     members = parse_members(members_input)
     if not members:
@@ -56,19 +56,10 @@ if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直
             all_text_lines.append(line)
         all_text = "\n".join(all_text_lines)
 
-        # 表示用
-        st.text_area("結果", value=all_text, height=200)
+        # 表示
+        st.text_area("結果", value=all_text, height=200, key="result_area")
 
-        # コピー用 HTML + JS
-        escaped_text = html.escape(all_text)
-        st.markdown(f"""
-        <textarea id="copy_area" style="display:none;">{escaped_text}</textarea>
-        <button onclick="
-        const ta = document.getElementById('copy_area');
-        ta.style.display='block';
-        ta.select();
-        document.execCommand('copy');
-        ta.style.display='none';
-        alert('✅ コピーしました！');
-        ">📋 まとめてコピー</button>
-        """, unsafe_allow_html=True)
+        # まとめコピー（Streamlit 標準）
+        if st.button("📋 まとめてコピー"):
+            st.experimental_set_clipboard(all_text)
+            st.success("✅ コピーしました！")
