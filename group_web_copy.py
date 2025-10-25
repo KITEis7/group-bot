@@ -38,7 +38,7 @@ def generate_result():
     groups = make_groups(st.session_state.members)
     result_text = ""
     for i, g in enumerate(groups, 1):
-        result_text += f"#パーティー{i} " + ", ".join(g) + "\n"
+        result_text += f"#パーティー{i} " + ", ".join(g) + " テキスト\n"  # ← 「テキスト」追加
     st.session_state.result_text = result_text
 
 # ボタン
