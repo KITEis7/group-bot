@@ -1,7 +1,7 @@
 import streamlit as st
 import random
 
-st.title("わけわけBOT")
+st.title("わけわけ")
 
 members_input = st.text_area(
     "メンバーを入力してください（カンマ、半角スペース、全角スペース区切りOK）", ""
@@ -22,7 +22,6 @@ def make_groups(members):
     total = len(members)
     random.shuffle(members)
     best_groups = []
-    # 均等に2〜4人になるよう調整
     for n_groups in range(1, total + 1):
         size = total // n_groups
         if size < 2 or size > 4:
@@ -37,9 +36,11 @@ def make_groups(members):
         break
     return best_groups
 
-if st.button("🎯 グループ分けする"):
-    members = parse_members(members_input)
+result_text = ""  # 結果文字列を保持する変数
 
+# グループ分けボタン
+if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直す"):
+    members = parse_members(members_input)
     if not members:
         st.warning("⚠ メンバーを入力してください。")
     elif len(members) < 2:
@@ -47,9 +48,14 @@ if st.button("🎯 グループ分けする"):
     else:
         groups = make_groups(members)
         lines = []
-        for i, group in enumerate(groups, 1):
+        for i, group in enumerate(groups, start=1):
             znum = to_zenkaku(i)
             lines.append(f"#パーティー{znum}テキスト " + ", ".join(group))
-        result = "\n".join(lines)
+        result_text = "\n".join(lines)
+        st.text_area("結果", value=result_text, height=250)
 
-        st.text_area("結果（コピーして使ってください）", result, height=250)
+# まとめコピー専用ボタン
+if result_text:
+    if st.button("📋 まとめてコピー"):
+        st.experimental_set_clipboard(result_text)
+        st.success("✅ 結果をコピーしました！")
