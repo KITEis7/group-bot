@@ -1,8 +1,7 @@
 import streamlit as st
 import random
-import pyperclip  # クリップボード用ライブラリ（pip install pyperclip）
 
-st.title("🎲 グループ分けBOT")
+st.title("わけわけBOT")
 
 # メンバー入力欄
 members_input = st.text_area("メンバーを入力してください（カンマ、全角スペース、半角スペース区切りOK）", "")
@@ -26,7 +25,6 @@ def make_groups(members):
     total = len(members)
     random.shuffle(members)
 
-    # グループ数を試行して最も均等な分け方を選ぶ
     best_groups = None
     min_diff = float("inf")
 
@@ -48,6 +46,18 @@ def make_groups(members):
             best_groups = groups
     return best_groups
 
+# JavaScriptでクリップボードにコピーする関数
+copy_script = """
+<script>
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text);
+  alert("コピーしました！");
+}
+</script>
+"""
+
+st.markdown(copy_script, unsafe_allow_html=True)
+
 # ボタン押下時の処理
 if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直す"):
     members = parse_members(members_input)
@@ -64,6 +74,8 @@ if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直
             zenkaku_num = to_zenkaku(i)
             title = f"#パーティー{zenkaku_num}テキスト\n{group_text}"
             st.markdown(f"### {title}")
-            if st.button(f"📋 このグループをコピー ({zenkaku_num})", key=f"copy_{i}"):
-                pyperclip.copy(title)
-                st.success(f"✅ #パーティー{zenkaku_num} をコピーしました！")
+            st.markdown(
+                f'<button onclick="copyToClipboard(`{title}`)" '
+                f'style="margin-top:5px;">📋 コピー</button>',
+                unsafe_allow_html=True
+            )
