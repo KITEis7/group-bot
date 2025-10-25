@@ -4,7 +4,9 @@ import random
 st.title("わけわけBOT")
 
 # メンバー入力欄
-members_input = st.text_area("メンバーを入力してください（カンマ、全角スペース、半角スペース区切りOK）", "")
+members_input = st.text_area(
+    "メンバーを入力してください（カンマ、全角スペース、半角スペース区切りOK）", ""
+)
 
 # 区切りを統一して分割
 def parse_members(text):
@@ -51,14 +53,13 @@ copy_script = """
 <script>
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text);
-  alert("コピーしました！");
+  alert("✅ コピーしました！");
 }
 </script>
 """
-
 st.markdown(copy_script, unsafe_allow_html=True)
 
-# ボタン押下時の処理
+# グループ分けボタン
 if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直す"):
     members = parse_members(members_input)
 
@@ -68,14 +69,15 @@ if st.button("🎯 グループ分けする") or st.button("🔁 振り分け直
         st.warning("⚠ 2人以上必要です。")
     else:
         groups = make_groups(members)
+        all_text = ""
 
         for i, group in enumerate(groups, start=1):
             group_text = ", ".join(group)
             zenkaku_num = to_zenkaku(i)
-            title = f"#パーティー{zenkaku_num}テキスト\n{group_text}"
-            st.markdown(f"### {title}")
-            st.markdown(
-                f'<button onclick="copyToClipboard(`{title}`)" '
-                f'style="margin-top:5px;">📋 コピー</button>',
-                unsafe_allow_html=True
-            )
+            title = f"#パーティー{zenkaku_num}テキスト {group_text}"
+            all_text += title + "\n"
+
+        st.text_area("結果", value=all_text, height=200)
+
+        # 全部まとめてコピーボタン
+        st.markdown(
